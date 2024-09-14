@@ -1,12 +1,17 @@
 package tomocomd.configuration.dcs.startpep;
 
 import java.util.Random;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import tomocomd.configuration.dcs.AHeadEntity;
 import tomocomd.configuration.dcs.APdDCS;
 import tomocomd.configuration.dcs.PDType;
 import tomocomd.exceptions.AExOpDCSException;
+import tomocomd.md.HeaderValidator;
 import tomocomd.utils.Constants;
 
+@Getter
+@AllArgsConstructor
 public class StartpepDCS extends APdDCS {
 
   private static final String SPACE = ",\n\t ";
@@ -25,22 +30,6 @@ public class StartpepDCS extends APdDCS {
     classicalAggParam = new ClassicalAggParam();
   }
 
-  protected StartpepDCS(String name) {
-    super(name);
-    aggregatorsParam = new AggregatorsParam();
-    groupsParam = new GroupsParam();
-    propertyParam = new PropertyParam();
-    classicalAggParam = new ClassicalAggParam();
-  }
-
-  protected StartpepDCS(StartpepDCS startpepDCS) {
-    super(startpepDCS.getName());
-    aggregatorsParam = startpepDCS.getAggregatorsParam();
-    groupsParam = startpepDCS.getGroupsParam();
-    propertyParam = startpepDCS.getPropertyParam();
-    classicalAggParam = startpepDCS.getClassicalAggParam();
-  }
-
   @Override
   public PDType getType() {
     return PDType.STARTPEP;
@@ -48,7 +37,11 @@ public class StartpepDCS extends APdDCS {
 
   @Override
   public AHeadEntity randomHeading() {
-    return null;
+    StartpepHeadEntity head = getValidateHead();
+    while (!HeaderValidator.validateHeader(head.toString())) {
+      head = getValidateHead();
+    }
+    return head;
   }
 
   @Override
@@ -96,19 +89,20 @@ public class StartpepDCS extends APdDCS {
     }
   }
 
-  public ClassicalAggParam getClassicalAggParam() {
-    return classicalAggParam;
-  }
-
-  public AggregatorsParam getAggregatorsParam() {
-    return aggregatorsParam;
-  }
-
-  public GroupsParam getGroupsParam() {
-    return groupsParam;
-  }
-
-  public PropertyParam getPropertyParam() {
-    return propertyParam;
+  private StartpepHeadEntity getValidateHead() {
+    String classAgreOpe =
+        getClassicalAggParam().getValues()[rand.nextInt(getClassicalAggParam().getValues().length)];
+    String agreOpe =
+        getAggregatorsParam().getValues()[rand.nextInt(getAggregatorsParam().getValues().length)];
+    String group = getGroupsParam().getValues()[rand.nextInt(getGroupsParam().getValues().length)];
+    String prop =
+        getPropertyParam().getValues()[rand.nextInt(getPropertyParam().getValues().length)];
+    return StartpepHeadEntity.builder()
+        .agregOpeClas(classAgreOpe)
+        .agreOpe(agreOpe)
+        .group(group)
+        .prop(prop)
+        .type(getType())
+        .build();
   }
 }

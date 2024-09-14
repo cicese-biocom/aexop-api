@@ -1,5 +1,8 @@
 package tomocomd.exceptions;
 
+import lombok.Getter;
+
+@Getter
 public class AExOpDCSException extends RuntimeException {
   private final ExceptionType type;
 
@@ -23,9 +26,11 @@ public class AExOpDCSException extends RuntimeException {
     this.type = type;
   }
 
+  @Getter
   public enum ExceptionType {
     DCS_EXCEPTION("Invalid DCS"),
-    MD_PARAM_EXCEPTION_TYPE("Unknown param name for a DCS");
+    MD_PARAM_EXCEPTION_TYPE("Unknown param name for a DCS"),
+    READING_SEQ_FILE_EXCEPTION_TYPE("Error reading the sequences file");
 
     private final String message;
 
@@ -51,10 +56,6 @@ public class AExOpDCSException extends RuntimeException {
 
     public AExOpDCSException get(String message, Throwable cause) {
       return new AExOpDCSException(this, cause, message);
-    }
-
-    public String getMessage() {
-      return message;
     }
   }
 }
