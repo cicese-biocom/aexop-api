@@ -30,6 +30,19 @@ public class AExOpDCSException extends RuntimeException {
   public enum ExceptionType {
     DCS_EXCEPTION("Invalid DCS"),
     MD_PARAM_EXCEPTION_TYPE("Unknown param name for a DCS"),
+    MD_EVALUATION_FUNCTION_EXCEPTION("Error in evaluation function"),
+    STATISTICS_EXCEPTION("Error in evaluation function"),
+    FUZZY_MEASURE_EXCEPTION("Error in evaluation fuzzy measure"),
+    PARSE_EXCEPTION("Error parsing"),
+    FUZZY_INTEGRAL_EXCEPTION("Error in evaluating fuzzy integral"),
+    SUBSET_EVALUATE_EXCEPTION("Error in evaluating subset"),
+    FILTER_EXCEPTION("Error Filtering data"),
+    REPLACE_EXCEPTION("Error replacing populations"),
+    CROSSOVER_EXCEPTION("Error in crossover"),
+    MUTATION_EXCEPTION("Error executing mutation operator"),
+    SELECTION_EXCEPTION("Error selecting MDs"),
+    CSV_FILE_WRITING_EXCEPTION("Error writing csv file"),
+    CSV_FILE_LOADING_EXCEPTION("Error reading csv file"),
     READING_SEQ_FILE_EXCEPTION_TYPE("Error reading the sequences file");
 
     private final String message;

@@ -33,16 +33,16 @@ class StartpepDCSTest {
 
   @Test
   void getSetDim() {
-    assertEquals(718080, startpepDCS.getSetDim());
+    assertEquals(29920, startpepDCS.getSetDim());
   }
 
   @Test
   void getDesc() {
     assertEquals(
-        "PD(718080 molecular descriptors){\n"
-            + "\t Type=STARTPEP,\n"
-            + "\t Classical Aggregation Operator=[MIC,ES,,AC[1],AC[2],AC[3],AC[4],AC[5],AC[6],AC[7],GV[1],GV[2],GV[3],GV[4],GV[5],GV[6],GV[7],TS[1],TS[2],TS[3],TS[4],TS[5],TS[6],TS[7]],\n"
-            + "\t Aggregation Operator={\n"
+        "PD(29920 molecular descriptors){\n"
+            + "\t\t Type=STARTPEP,\n"
+            + "\t\t Classical Aggregation Operator=[],\n"
+            + "\t\t Aggregation Operator={\n"
             + "\t\t Norms=[N1,N2,N3],\n"
             + "\t\t Means=[GM,AM,P2,P3,HM],\n"
             + "\t\t statistics=[V,S,K,SD,VC,RA,Q1,Q2,Q3,I50,MX,MN],\n"
@@ -50,15 +50,15 @@ class StartpepDCSTest {
             + "\t\t Gowawa=[v[0.9;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[1.0;1;AO2-OWA;1.0;0.0;1;NONE;0.0;0.0],GOWAWA[0.1;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.2;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.7;1;S-OWA;0.8;0.2;1;ES2-OWA;0.9;0.0],GOWAWA[0.8;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.5;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.2;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[1.0;1;ES1-OWA;0.7;0.0;1;NONE;0.0;0.0],GOWAWA[0.5;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.9;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.2;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.7;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.6;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.5;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[1.0;1;S-OWA;0.8;0.2;1;NONE;0.0;0.0],GOWAWA[0.7;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.0;1;NONE;0.0;0.0;1;S-OWA;1.0;0.0],GOWAWA[0.1;0;W-OWA;0.1;0.6;2;W-OWA;0.1;0.2],GOWAWA[0.0;1;NONE;0.0;0.0;2;W-OWA;0.4;0.5],GOWAWA[0.0;1;NONE;0.0;0.0;2;W-OWA;0.7;0.8],GOWAWA[0.1;2;ES2-OWA;0.9;0.0;2;W-OWA;0.3;0.4],GOWAWA[0.3;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.4;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.9;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.0;1;NONE;0.0;0.0;2;W-OWA;0.5;0.6],GOWAWA[0.1;0;AO1-OWA;1.0;0.0;2;S-OWA;0.8;0.1],GOWAWA[0.0;1;NONE;0.0;0.0;2;W-OWA;0.5;0.7],GOWAWA[0.6;1;S-OWA;1.0;0.0;2;W-OWA;0.9;1.0],GOWAWA[0.1;2;ES2-OWA;0.9;0.0;2;W-OWA;0.2;0.3],GOWAWA[1.0;1;ES1-OWA;0.7;0.0;1;NONE;0.0;0.0],GOWAWA[1.0;1;S-OWA;1.0;0.0;1;NONE;0.0;0.0],GOWAWA[1.0;2;ES2-OWA;0.9;0.0;1;NONE;0.0;0.0],GOWAWA[0.5;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[1.0;1;S-OWA;0.8;0.2;1;NONE;0.0;0.0],GOWAWA[0.0;1;NONE;0.0;0.0;0;S-OWA;0.0;1.0],GOWAWA[0.7;2;ES2-OWA;0.9;0.0;0;S-OWA;0.0;1.0],GOWAWA[0.1;2;ES2-OWA;0.9;0.0;2;W-OWA;0.7;0.8],GOWAWA[0.1;2;ES2-OWA;0.9;0.0;0;W-OWA;0.0;0.1],GOWAWA[0.9;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.2;2;ES2-OWA;0.9;0.0;2;W-OWA;0.4;0.6],GOWAWA[0.3;2;S-OWA;0.6;0.0;2;W-OWA;0.9;1.0],GOWAWA[0.4;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[1.0;1;AO2-OWA;1.0;0.0;1;NONE;0.0;0.0],GOWAWA[0.0;1;NONE;0.0;0.0;1;S-OWA;1.0;0.0],GOWAWA[0.8;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.9;1;ES1-OWA;0.7;0.0;1;ES2-OWA;0.9;0.0],GOWAWA[0.2;2;S-OWA;0.6;0.0;2;S-OWA;0.8;0.1]],\n"
             + "\t\t Information=[TIC,SIC]\n"
             + "\t\t},\n"
-            + "\t Chemical Groups=[T,A,H,P,R,B,F,N,C,U,D],\n"
-            + "\t Aminoacid properties=[ptt,gcp1,gcp2,eps,scm,scv,pie,pah,pbs,isa,z1,z2,z3,mw,bi,khh,hwhh,cch,kh,cdch]\n"
-            + "}",
+            + "\t\t Chemical Groups=[T,A,H,P,R,B,F,N,C,U,D],\n"
+            + "\t\t Aminoacid properties=[ptt,gcp1,gcp2,eps,scm,scv,pie,pah,pbs,isa,z1,z2,z3,mw,bi,khh,hwhh,cch,kh,cdch]\n"
+            + "\t\t}",
         startpepDCS.getDesc());
   }
 
   @Test
   void getValues4ParamClass() {
-    assertEquals(24, startpepDCS.getValues4Param(Constants.CLASAGGOPECONST).length);
+    assertEquals(1, startpepDCS.getValues4Param(Constants.CLASAGGOPECONST).length);
   }
 
   @Test

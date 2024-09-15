@@ -3,8 +3,8 @@ package tomocomd.configuration.dcs.startpep;
 import java.util.Random;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import tomocomd.configuration.dcs.AAttributeDCS;
 import tomocomd.configuration.dcs.AHeadEntity;
-import tomocomd.configuration.dcs.APdDCS;
 import tomocomd.configuration.dcs.PDType;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.md.HeaderValidator;
@@ -12,9 +12,9 @@ import tomocomd.utils.Constants;
 
 @Getter
 @AllArgsConstructor
-public class StartpepDCS extends APdDCS {
+public class StartpepDCS extends AAttributeDCS {
 
-  private static final String SPACE = ",\n\t ";
+  private static final String SPACE = ",\n\t\t ";
   private static final Random rand = new Random();
 
   protected final ClassicalAggParam classicalAggParam;
@@ -22,8 +22,16 @@ public class StartpepDCS extends APdDCS {
   protected final GroupsParam groupsParam;
   protected final PropertyParam propertyParam;
 
-  protected StartpepDCS() {
+  public StartpepDCS() {
     super();
+    aggregatorsParam = new AggregatorsParam();
+    groupsParam = new GroupsParam();
+    propertyParam = new PropertyParam();
+    classicalAggParam = new ClassicalAggParam();
+  }
+
+  public StartpepDCS(String name) {
+    super(name);
     aggregatorsParam = new AggregatorsParam();
     groupsParam = new GroupsParam();
     propertyParam = new PropertyParam();
@@ -59,7 +67,7 @@ public class StartpepDCS extends APdDCS {
         + "("
         + getSetDim()
         + " molecular descriptors){"
-        + "\n\t Type="
+        + "\n\t\t Type="
         + getType()
         + SPACE
         + getClassicalAggParam().toString()
@@ -69,7 +77,7 @@ public class StartpepDCS extends APdDCS {
         + getGroupsParam().toString()
         + SPACE
         + getPropertyParam().toString()
-        + "\n}";
+        + "\n\t\t}";
   }
 
   @Override
@@ -104,5 +112,10 @@ public class StartpepDCS extends APdDCS {
         .prop(prop)
         .type(getType())
         .build();
+  }
+
+  @Override
+  public String toString() {
+    return getDesc();
   }
 }
