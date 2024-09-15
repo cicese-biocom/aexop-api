@@ -18,12 +18,11 @@ public class ClassicalAggParam extends AParamsDCS {
 
   @Override
   public void setDefault() {
-    //    params.put("IB", true);
-    params.put("AC", true);
-    params.put("GV", true);
-    params.put("TS", true);
-    params.put("ES", true);
-    params.put("MIC", true);
+    params.put("AC", false);
+    params.put("GV", false);
+    params.put("TS", false);
+    params.put("ES", false);
+    params.put("MIC", false);
     params.put("", true);
   }
 
@@ -31,7 +30,6 @@ public class ClassicalAggParam extends AParamsDCS {
   public String[] getValues() {
     List<String> values = new LinkedList<>();
     if (Boolean.TRUE.equals(params.get("MIC"))) values.add("MIC");
-    //        if (Boolean.TRUE.equals(params.get("IB"))) values.add("IB");
     if (Boolean.TRUE.equals(params.get("ES"))) values.add("ES");
     if (Boolean.TRUE.equals(params.get(""))) values.add("");
     if (Boolean.TRUE.equals(params.get("AC")))

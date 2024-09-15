@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.SneakyThrows;
@@ -28,7 +30,7 @@ class StartpepDescriptorExecutorTest {
 
   @Test
   void compute() {
-    Set<String> pdSet = Set.of("MIC_S_T_ptt", "TIC_T_ptt", "ES_TIC_T_ptt");
+    Set<String> pdSet = new LinkedHashSet<>(List.of("MIC_S_T_ptt", "TIC_T_ptt", "ES_TIC_T_ptt"));
     PopulationInstances data = startpepDescriptorExecutor.compute(pdSet, filePath.toString());
     assertNotNull(data);
     assertEquals(3, data.numAttributes());

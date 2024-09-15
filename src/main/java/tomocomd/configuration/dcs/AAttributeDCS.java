@@ -1,21 +1,17 @@
 package tomocomd.configuration.dcs;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-public abstract class APdDCS implements Serializable {
+@Data
+@AllArgsConstructor
+public abstract class AAttributeDCS implements Serializable {
 
   protected final String name;
 
-  protected APdDCS() {
+  protected AAttributeDCS() {
     this.name = "PD";
-  }
-
-  protected APdDCS(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public abstract PDType getType();

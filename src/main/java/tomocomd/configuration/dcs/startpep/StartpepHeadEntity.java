@@ -20,6 +20,14 @@ public class StartpepHeadEntity implements AHeadEntity {
   private String prop;
   @Getter private final PDType type;
 
+  public StartpepHeadEntity(PDType type) {
+    this.type = type;
+    this.agregOpeClas = "";
+    this.agreOpe = "";
+    this.group = "";
+    this.prop = "";
+  }
+
   @Override
   public Map<String, String> parseHead2Map() {
     return Map.of(
