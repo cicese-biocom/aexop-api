@@ -35,8 +35,8 @@ public class DCSEvolutiveConfig implements Serializable {
     this.numDesc = 100;
     incest = true;
     filtersConfig = new LinkedList<>();
-    filtersConfig.add(
-        new FilterConfig(FilterType.NAN, new String[] {"-t", "IMPUTATION", "-v", "ZERO"}));
+    filtersConfig.add(new FilterConfig(FilterType.NAN, new String[] {"-t", "DELETE"}));
+    filtersConfig.add(new FilterConfig(FilterType.SE, new String[] {"-t", "0.15"}));
 
     this.selConf = new GASelectionConfig();
     this.crossConf = new GACrossoverConf();

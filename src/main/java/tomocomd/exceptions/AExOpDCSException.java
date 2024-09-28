@@ -43,6 +43,8 @@ public class AExOpDCSException extends RuntimeException {
     SELECTION_EXCEPTION("Error selecting MDs"),
     CSV_FILE_WRITING_EXCEPTION("Error writing csv file"),
     CSV_FILE_LOADING_EXCEPTION("Error reading csv file"),
+    DCS_EVOLUTION_EXCEPTION("Error Executing evolution process for some DCS"),
+    AEXOPDCS_EXCEPTION("Error Executing evolution process"),
     READING_SEQ_FILE_EXCEPTION_TYPE("Error reading the sequences file");
 
     private final String message;
