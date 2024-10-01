@@ -612,6 +612,10 @@ public class AexopDcs {
             .flatMap(Set::stream)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
+    if (allHeads.isEmpty()) {
+      LOGGER.error("No molecular descriptors to compute");
+      return new LinkedHashMap<>();
+    }
     PopulationInstances instances = computeDesc(allHeads);
     return splitTotalPopulation(instances, popHeads);
   }
@@ -625,6 +629,16 @@ public class AexopDcs {
    */
   protected Map<Integer, PopulationInstances> applyFilter2Children(
       Map<Integer, PopulationInstances> children4Population) throws AExOpDCSException {
+
+    if (Objects.isNull(children4Population)) {
+      LOGGER.error("No molecular descriptors to filter");
+      return new LinkedHashMap<>();
+    }
+
+    if (children4Population.isEmpty()) {
+      LOGGER.error("No molecular descriptors to filter");
+      return new LinkedHashMap<>();
+    }
 
     Map<Integer, PopulationInstances> children4PopulationFiltered = new ConcurrentHashMap<>();
 

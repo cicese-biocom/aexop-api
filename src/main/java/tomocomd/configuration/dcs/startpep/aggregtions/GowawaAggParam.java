@@ -32,7 +32,7 @@ public class GowawaAggParam extends AParamsDCS {
   public void validate() {}
 
   private static final String[] defaultOWAWAs = {
-    "v[0.9;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0]",
+    "GOWAWA[0.9;1;AO2-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0]",
     "GOWAWA[1.0;1;AO2-OWA;1.0;0.0;1;NONE;0.0;0.0]",
     "GOWAWA[0.1;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0]",
     "GOWAWA[0.2;1;S-OWA;1.0;0.0;1;ES2-OWA;0.9;0.0]",
