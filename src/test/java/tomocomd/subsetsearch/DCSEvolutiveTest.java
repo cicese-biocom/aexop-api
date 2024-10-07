@@ -2,7 +2,6 @@ package tomocomd.subsetsearch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Set;
@@ -111,8 +110,8 @@ class DCSEvolutiveTest {
 
     dcsEvolutive.applyFilter();
     PopulationInstances pInew = dcsEvolutive.getBestSubset();
-    assertEquals(26, pInew.numAttributes());
-    assertArrayEquals(new double[54], pInew.attributeToDoubleArray(pInew.numAttributes() - 1));
+    assertEquals(22, pInew.numAttributes());
+    assertArrayEquals(getLastDesc(), pInew.attributeToDoubleArray(pInew.numAttributes() - 1));
   }
 
   @Test
@@ -154,8 +153,7 @@ class DCSEvolutiveTest {
   }
 
   @Test
-  void geneticOperators()
-      throws FileNotFoundException, NoSuchFieldException, IllegalAccessException {
+  void geneticOperators() throws NoSuchFieldException, IllegalAccessException {
     PopulationInstances populationInstances =
         new PopulationInstances(CSVManage.loadCSV("csv/classData.csv"));
     populationInstances.setClassIndex(0);
@@ -167,6 +165,15 @@ class DCSEvolutiveTest {
     parentsField.setAccessible(true);
     Set<AHeadEntity> heads = (Set<AHeadEntity>) parentsField.get(dcsEvolutive);
     assertEquals(4, heads.size());
+  }
+
+  double[] getLastDesc() {
+    return new double[] {
+      0.0, 0.0, 0.0, 0.0, 9.66E-7, 2.7E-6, 2.61E-7, 0.0, 0.0, 0.0, 4.55E-8, 5.28E-7, 0.0, 0.0, 0.0,
+      0.0, 3.14E-7, 0.0, 3.82E-8, 0.0, 4.66E-8, 0.0, 0.0, 0.0, 0.0, 0.0, -1.32E-10, 0.0, -2.06E-10,
+      0.0, 3.81E-11, -8.49E-9, -4.39E-9, 1.18E-7, 0.0, 0.0, 0.0, 0.0, -6.15E-7, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 6.79E-10, 2.63E-8, 2.67E-6, 7.56E-8, -4.29E-7, -1.98E-7, 6.89E-10, 0.0
+    };
   }
 
   double[] getEva() {
