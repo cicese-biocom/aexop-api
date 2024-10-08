@@ -5,6 +5,7 @@
  */
 package tomocomd.configuration.filters;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,18 +15,21 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Potter
  */
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FilterConfig implements Serializable {
   private FilterType type;
   private String[] options;
 
-  static String[][] values =
+  private static String[][] values =
       new String[][] {
         {"NAN", "1"},
         {"CORR", "3"},

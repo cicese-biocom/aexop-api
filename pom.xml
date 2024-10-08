@@ -27,7 +27,7 @@
         <!-- maven compiler versions  -->
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.24.1</log4j.version>
     </properties>
 
     <dependencies>
@@ -81,6 +81,11 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
         <!-- lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -101,6 +106,11 @@
             <version>0.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.18.0</version>
+        </dependency>
     </dependencies>
 
     <build>
