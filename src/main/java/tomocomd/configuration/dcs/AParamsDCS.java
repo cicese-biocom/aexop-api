@@ -1,13 +1,20 @@
 package tomocomd.configuration.dcs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Data;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tomocomd.exceptions.AExOpDCSException;
 
+@Data
+@Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AParamsDCS implements Serializable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AParamsDCS.class);
@@ -47,10 +54,7 @@ public abstract class AParamsDCS implements Serializable {
     }
   }
 
-  public Map<String, Boolean> getParams() {
-    return params;
-  }
-
+  @JsonIgnore
   public String[] getValues() {
     return params.entrySet().stream()
         .filter(Map.Entry::getValue)
@@ -75,6 +79,7 @@ public abstract class AParamsDCS implements Serializable {
 
   public abstract String getParamName();
 
+  @Override
   public String toString() {
     return getParamName()
         + "="
