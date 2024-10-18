@@ -3,9 +3,7 @@ package tomocomd.subsetsearch;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +20,7 @@ import tomocomd.io.CSVManage;
 import tomocomd.subsetsearch.evaluation.subsetevaluation.EvaluateSubsetFactory;
 import tomocomd.subsetsearch.evaluation.subsetevaluation.IEvaluateSubset;
 import tomocomd.subsetsearch.replace.resetpoblation.ResetPopulation;
+import tomocomd.utils.ResourceMetrics;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -52,6 +51,7 @@ public class AexopDcs {
   private final String pathOut;
 
   private final PopulationInstances targetInstances;
+  private final ResourceMetrics resourceMetrics;
 
   public AexopDcs(AexopConfig conf, String outFile, String fastaFile, String pathCsvTarget)
       throws AExOpDCSException {
@@ -74,6 +74,7 @@ public class AexopDcs {
     }
     if (Boolean.TRUE.equals(conf.getCoop())) coopsPob = new PopulationInstances[populations.size()];
     LOGGER.info("AexopDcs objected created");
+    resourceMetrics = new ResourceMetrics();
   }
 
   public void compute() throws AExOpDCSException {
@@ -116,7 +117,9 @@ public class AexopDcs {
         System.currentTimeMillis() - initOpe);
 
     initOpe = System.currentTimeMillis();
+    resourceMetrics.logMetrics("executeComputeMDQuality(before)", getClass().getName());
     executeComputeMDQuality();
+    resourceMetrics.logMetrics("executeComputeMDQuality(after)", getClass().getName());
     LOGGER.info(
         "Step 2.2: Computed MD quality take {} milliseconds", System.currentTimeMillis() - initOpe);
 
@@ -125,7 +128,9 @@ public class AexopDcs {
       totalPop = PopulationInstances.merge(totalPop, populations.get(i).getBestSubset());
 
     initOpe = System.currentTimeMillis();
+    resourceMetrics.logMetrics("updateBestSubset(before)", getClass().getName());
     boolean resetCauseLocal = updateBestSubset(totalPop);
+    resourceMetrics.logMetrics("updateBestSubset(after)", getClass().getName());
     LOGGER.info(
         "Step 3: Get best subset take {} milliseconds", System.currentTimeMillis() - initOpe);
     initOpe = System.currentTimeMillis();
@@ -151,6 +156,7 @@ public class AexopDcs {
    * @throws AExOpDCSException if there's an issue generating the population.
    */
   public void generatePopulation() throws AExOpDCSException {
+    resourceMetrics.logMetrics("generatePopulation(before)", getClass().getName());
     Map<Integer, Set<String>> headingsByPopulation = new LinkedHashMap<>();
     Set<String> allGeneratedHeads = generateHeadings(headingsByPopulation);
 
@@ -162,6 +168,7 @@ public class AexopDcs {
 
       allGeneratedHeads = generateHeadings(headingsByPopulation);
     }
+    resourceMetrics.logMetrics("generatePopulation(after)", getClass().getName());
   }
 
   /**
@@ -222,11 +229,11 @@ public class AexopDcs {
   }
 
   /**
-   * Splits the total population into sub-populations based on the given set of population headings.
+   * Splits the total population into subpopulations based on the given set of population headings.
    *
    * @param data the total population to split.
    * @param populationHeadings the map of population headings to attribute names.
-   * @return the map of population IDs to sub-populations.
+   * @return the map of population IDs to subpopulations.
    * @throws AExOpDCSException if there's an issue splitting the population.
    */
   private Map<Integer, PopulationInstances> splitTotalPopulation(
@@ -306,6 +313,7 @@ public class AexopDcs {
    * @throws AExOpDCSException if there's an issue retrieving instances.
    */
   protected void getInstances4Coop() throws AExOpDCSException {
+    resourceMetrics.logMetrics("executeGetInstances4Coop(before)", getClass().getName());
     coopsPob = new PopulationInstances[populations.size()];
     List<PopulationInstances> populationsForCoop = new ArrayList<>(populations.size());
 
@@ -318,6 +326,7 @@ public class AexopDcs {
     } catch (Exception e) {
       throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(e);
     }
+    resourceMetrics.logMetrics("executeGetInstances4Coop(before)", getClass().getName());
   }
 
   /**
@@ -341,12 +350,14 @@ public class AexopDcs {
    * @throws AExOpDCSException if there's an issue evaluating molecular descriptors.
    */
   void executeComputeMDQuality() throws AExOpDCSException {
+    int numHilos = Math.min(Runtime.getRuntime().availableProcessors(), populations.size());
+    ExecutorService executor = Executors.newFixedThreadPool(numHilos);
     List<CompletableFuture<Void>> futures =
         IntStream.range(0, populations.size())
             .mapToObj(
                 idxPop ->
                     CompletableFuture.runAsync(
-                        () -> populations.get(idxPop).evaluateMd(coopsPob[idxPop])))
+                        () -> populations.get(idxPop).evaluateMd(coopsPob[idxPop]), executor))
             .collect(Collectors.toList());
 
     try {
@@ -357,6 +368,16 @@ public class AexopDcs {
       Thread.currentThread().interrupt();
       throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
           "Error evaluating molecular descriptors", e.getCause());
+    } finally {
+      executor.shutdown(); // Shutdown the executor
+      try {
+        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+          executor.shutdownNow(); // Force shutdown if tasks take too long
+        }
+      } catch (InterruptedException e) {
+        executor.shutdownNow();
+        Thread.currentThread().interrupt();
+      }
     }
   }
 
@@ -368,7 +389,6 @@ public class AexopDcs {
    * @throws AExOpDCSException if an error occurs during the comparison
    */
   boolean updateBestSubset(PopulationInstances subIter) throws AExOpDCSException {
-
     boolean isSubsetUpdated;
     double lastBest = 0;
     PopulationInstances frontInst = new PopulationInstances(subIter);
@@ -478,27 +498,16 @@ public class AexopDcs {
    */
   protected void executeMDReplace(Map<Integer, PopulationInstances> children4Population)
       throws AExOpDCSException {
+    resourceMetrics.logMetrics("executeMDReplace(before)", getClass().getName());
 
-    List<CompletableFuture<Void>> futures =
-        children4Population.entrySet().stream()
-            .map(
-                entry ->
-                    CompletableFuture.runAsync(
-                        () -> populations.get(entry.getKey()).makeReplace(entry.getValue())))
-            .collect(Collectors.toList());
-
-    try {
-      CompletableFuture<Void> allOf =
-          CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-      allOf.get(); // Wait for all tasks to complete
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
-          "Error Executing replace operators", e.getCause());
+    for (Map.Entry<Integer, PopulationInstances> entry : children4Population.entrySet()) {
+      populations.get(entry.getKey()).makeReplace(entry.getValue());
     }
+    resourceMetrics.logMetrics("executeMDReplace(after)", getClass().getName());
   }
 
   protected Map<Integer, PopulationInstances> executeEvolutiveSteps() throws AExOpDCSException {
+    resourceMetrics.logMetrics("executeEvolutiveSteps(before)", getClass().getName());
     int sumReal = 0;
     Map<Integer, PopulationInstances> children4Population = null;
     int sumExp =
@@ -560,6 +569,7 @@ public class AexopDcs {
       sumReal =
           children4Population.values().stream().mapToInt(PopulationInstances::numAttributes).sum();
     }
+    resourceMetrics.logMetrics("executeEvolutiveSteps(after)", getClass().getName());
     return children4Population;
   }
 
@@ -581,23 +591,8 @@ public class AexopDcs {
   }
 
   protected void executeGeneticOperators(Map<Integer, Integer> size4Pop) throws AExOpDCSException {
-
-    List<CompletableFuture<Void>> futures =
-        size4Pop.entrySet().stream()
-            .map(
-                entry ->
-                    CompletableFuture.runAsync(
-                        () -> populations.get(entry.getKey()).geneticsOperators(entry.getValue())))
-            .collect(Collectors.toList());
-
-    try {
-      CompletableFuture<Void> allOf =
-          CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-      allOf.get(); // Wait for all tasks to complete
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
-          "Error Executing genetic operators", e.getCause());
+    for (Map.Entry<Integer, Integer> entry : size4Pop.entrySet()) {
+      populations.get(entry.getKey()).geneticsOperators(entry.getValue());
     }
   }
 
@@ -640,30 +635,13 @@ public class AexopDcs {
       return new LinkedHashMap<>();
     }
 
-    Map<Integer, PopulationInstances> children4PopulationFiltered = new ConcurrentHashMap<>();
+    Map<Integer, PopulationInstances> children4PopulationFiltered = new HashMap<>();
 
-    List<CompletableFuture<Void>> futures =
-        children4Population.entrySet().stream()
-            .map(
-                entry ->
-                    CompletableFuture.runAsync(
-                        () -> {
-                          PopulationInstances data = entry.getValue();
-                          populations.get(entry.getKey()).applyFilter(data);
-                          children4PopulationFiltered.put(entry.getKey(), data);
-                        }))
-            .collect(Collectors.toList());
-
-    try {
-      CompletableFuture<Void> allOf =
-          CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-      allOf.get(); // Wait for all tasks to complete
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
-          "Error Executing filters operators", e.getCause());
+    for (Map.Entry<Integer, PopulationInstances> entry : children4Population.entrySet()) {
+      PopulationInstances data = entry.getValue();
+      populations.get(entry.getKey()).applyFilter(data);
+      children4PopulationFiltered.put(entry.getKey(), data);
     }
-
     return children4PopulationFiltered;
   }
 

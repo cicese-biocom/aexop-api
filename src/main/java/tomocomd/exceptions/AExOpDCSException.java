@@ -45,6 +45,7 @@ public class AExOpDCSException extends RuntimeException {
     CSV_FILE_LOADING_EXCEPTION("Error reading csv file"),
     DCS_EVOLUTION_EXCEPTION("Error Executing evolution process for some DCS"),
     AEXOPDCS_EXCEPTION("Error Executing evolution process"),
+    METRIC_EXCEPTION("Error initializing resource metrics"),
     READING_SEQ_FILE_EXCEPTION_TYPE("Error reading the sequences file");
 
     private final String message;
