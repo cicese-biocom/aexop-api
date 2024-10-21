@@ -29,8 +29,8 @@ public class AexopDcs {
 
   private static final Logger LOGGER = LogManager.getLogger(AexopDcs.class);
 
-  private static final double FITNESS_TOLERANCE = 0.001;
-  private static final int MAX_ITERATIONS_WITH_LITTLE_CHANGES = 3;
+  private static final double FITNESS_TOLERANCE = 0.0001;
+  private static final int MAX_ITERATIONS_WITH_LITTLE_CHANGES = 10;
   private static final int MAX_ITERATIONS_WITHOUT_CHANGES = 10;
 
   private static final String NAME_STATUS = "iterations";
