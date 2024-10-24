@@ -4,25 +4,20 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tomocomd.configuration.dcs.AAttributeDCS;
-import tomocomd.configuration.dcs.AHeadEntity;
 import tomocomd.configuration.subsetsearch.AexopConfig;
 import tomocomd.data.PopulationInstances;
-import tomocomd.descriptors.StartpepDescriptorExecutor;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.io.CSVManage;
 import tomocomd.subsetsearch.evaluation.subsetevaluation.EvaluateSubsetFactory;
 import tomocomd.subsetsearch.evaluation.subsetevaluation.IEvaluateSubset;
 import tomocomd.subsetsearch.replace.resetpoblation.ResetPopulation;
 import tomocomd.utils.ResourceMetrics;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
 
 @Getter
 public class AexopDcs {
@@ -47,7 +42,6 @@ public class AexopDcs {
   private PopulationInstances[] coopsPob;
   private PopulationInstances bestSubset;
 
-  private final String fastaFile;
   private final String pathOut;
 
   private final PopulationInstances targetInstances;
@@ -56,7 +50,6 @@ public class AexopDcs {
   public AexopDcs(AexopConfig conf, String outFile, String fastaFile, String pathCsvTarget)
       throws AExOpDCSException {
 
-    this.fastaFile = fastaFile;
     pathOut = outFile;
 
     targetInstances = new PopulationInstances(CSVManage.loadCSV(pathCsvTarget));
@@ -69,7 +62,7 @@ public class AexopDcs {
     populations = new LinkedList<>();
 
     for (AAttributeDCS head : conf.getAAttributeDCSList()) {
-      populations.add(new DCSEvolutive(conf.getDcsEvolutiveConfig(), head));
+      populations.add(new DCSEvolutive(conf.getDcsEvolutiveConfig(), head, fastaFile));
       populations.get(populations.size() - 1).resetBestSubset(getTargetInstances());
     }
     if (Boolean.TRUE.equals(conf.getCoop())) coopsPob = new PopulationInstances[populations.size()];
@@ -113,7 +106,7 @@ public class AexopDcs {
     initOpe = System.currentTimeMillis();
     executeGetInstances4Coop();
     LOGGER.info(
-        "Step 2.1: Generate individuos for cooperative step take {} milliseconds",
+        "Step 2.1: Generate individuals for cooperative step take {} milliseconds",
         System.currentTimeMillis() - initOpe);
 
     initOpe = System.currentTimeMillis();
@@ -139,13 +132,7 @@ public class AexopDcs {
       LOGGER.info(
           "Step 4: Reset population take {} milliseconds", System.currentTimeMillis() - initOpe);
     } else {
-      initOpe = System.currentTimeMillis();
-      Map<Integer, PopulationInstances> newPop = executeEvolutiveSteps();
-      LOGGER.info(
-          "Step 4: Genetic operators take {} milliseconds", System.currentTimeMillis() - initOpe);
-      initOpe = System.currentTimeMillis();
-      executeMDReplace(newPop);
-      LOGGER.info("Step 5: MD replace take {} milliseconds", System.currentTimeMillis() - initOpe);
+      executeEvolutionSteps();
     }
     updateExecStatus();
   }
@@ -157,132 +144,13 @@ public class AexopDcs {
    */
   public void generatePopulation() throws AExOpDCSException {
     resourceMetrics.logMetrics("generatePopulation(before)", getClass().getName());
-    Map<Integer, Set<String>> headingsByPopulation = new LinkedHashMap<>();
-    Set<String> allGeneratedHeads = generateHeadings(headingsByPopulation);
-
-    while (!allGeneratedHeads.isEmpty()) {
-      PopulationInstances instances = computeDesc(allGeneratedHeads);
-      Map<Integer, PopulationInstances> data4Pop =
-          splitTotalPopulation(instances, headingsByPopulation);
-      processPopulationData(data4Pop);
-
-      allGeneratedHeads = generateHeadings(headingsByPopulation);
+    try {
+      populations.forEach(DCSEvolutive::generatePopulation);
+    } catch (Exception e) {
+      throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
+          "Error generating new population", e);
     }
     resourceMetrics.logMetrics("generatePopulation(after)", getClass().getName());
-  }
-
-  /**
-   * Processes the population data by merging subsets and applying filters.
-   *
-   * @param populationData the population data to process.
-   */
-  private void processPopulationData(Map<Integer, PopulationInstances> populationData) {
-    for (Map.Entry<Integer, PopulationInstances> entry : populationData.entrySet()) {
-      if (!entry.getValue().isEmpty()) {
-        populations.get(entry.getKey()).mergeSubset(entry.getValue());
-        populations.get(entry.getKey()).applyFilter();
-      }
-    }
-  }
-
-  /**
-   * Generates headings for each population and stores them in the population headings map.
-   *
-   * @param populationHeadings the map to store population headings.
-   * @return a set of all headings.
-   * @throws AExOpDCSException if there's an issue generating headings.
-   */
-  private Set<String> generateHeadings(Map<Integer, Set<String>> populationHeadings)
-      throws AExOpDCSException {
-    Set<String> allHeadings = new LinkedHashSet<>();
-
-    for (int i = 0; i < populations.size(); i++) {
-      int numDescriptors =
-          populations.get(i).getNumDesc() - populations.get(i).populationSize() + 1;
-      Set<String> headings =
-          populations.get(i).generateHeadings(numDescriptors).stream()
-              .map(AHeadEntity::toString)
-              .collect(Collectors.toSet());
-      populationHeadings.put(i, headings);
-      allHeadings.addAll(headings);
-    }
-    return allHeadings;
-  }
-
-  /**
-   * Computes molecular descriptors for the given set of headings.
-   *
-   * @param allHeads the set of headings to compute descriptors for.
-   * @return the computed molecular descriptors.
-   * @throws AExOpDCSException if there's an issue computing descriptors.
-   */
-  private PopulationInstances computeDesc(Set<String> allHeads) throws AExOpDCSException {
-
-    StartpepDescriptorExecutor molecularDescriptorCalculator = new StartpepDescriptorExecutor();
-    long initTime = System.currentTimeMillis();
-    PopulationInstances data = molecularDescriptorCalculator.compute(allHeads, fastaFile);
-    LOGGER.debug(
-        "Computed {} molecular descriptors take {} ms",
-        allHeads.size(),
-        System.currentTimeMillis() - initTime);
-    return data;
-  }
-
-  /**
-   * Splits the total population into subpopulations based on the given set of population headings.
-   *
-   * @param data the total population to split.
-   * @param populationHeadings the map of population headings to attribute names.
-   * @return the map of population IDs to subpopulations.
-   * @throws AExOpDCSException if there's an issue splitting the population.
-   */
-  private Map<Integer, PopulationInstances> splitTotalPopulation(
-      PopulationInstances data, Map<Integer, Set<String>> populationHeadings)
-      throws AExOpDCSException {
-
-    Map<Integer, Set<Integer>> populationIndexMap = new LinkedHashMap<>();
-    // Initialize population index map with class index, if applicable
-    int classIndex = data.classIndex();
-    if (classIndex >= 0) {
-      populationHeadings
-          .keySet()
-          .forEach(
-              idxPop ->
-                  populationIndexMap.put(
-                      idxPop, new LinkedHashSet<>(Collections.singletonList(data.classIndex()))));
-    }
-
-    IntStream.range(0, data.numAttributes())
-        .forEach(
-            idxAtt -> {
-              String name = data.attribute(idxAtt).name();
-              populationHeadings.forEach(
-                  (idPop, heads) -> {
-                    if (heads.contains(name)) {
-                      populationIndexMap
-                          .computeIfAbsent(idPop, k -> new LinkedHashSet<>())
-                          .add(idxAtt);
-                    }
-                  });
-            });
-
-    Map<Integer, PopulationInstances> subPopulations = new LinkedHashMap<>();
-    for (Map.Entry<Integer, Set<Integer>> entry : populationIndexMap.entrySet()) {
-      int[] pos = entry.getValue().stream().mapToInt(Integer::intValue).toArray();
-      Remove remove = new Remove();
-      remove.setAttributeIndicesArray(pos);
-      remove.setInvertSelection(true);
-      try {
-        remove.setInputFormat(new PopulationInstances(data));
-        subPopulations.put(
-            entry.getKey(),
-            new PopulationInstances(Filter.useFilter(new PopulationInstances(data), remove)));
-      } catch (Exception e) {
-        throw AExOpDCSException.ExceptionType.DCS_EVOLUTION_EXCEPTION.get(
-            MSS_ERROR_COMPUTED_SPLIT_DESC, e);
-      }
-    }
-    return subPopulations;
   }
 
   /**
@@ -350,8 +218,8 @@ public class AexopDcs {
    * @throws AExOpDCSException if there's an issue evaluating molecular descriptors.
    */
   void executeComputeMDQuality() throws AExOpDCSException {
-    int numHilos = Math.min(Runtime.getRuntime().availableProcessors(), populations.size());
-    ExecutorService executor = Executors.newFixedThreadPool(numHilos);
+    int numThreads = Math.min(Runtime.getRuntime().availableProcessors(), populations.size());
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
     List<CompletableFuture<Void>> futures =
         IntStream.range(0, populations.size())
             .mapToObj(
@@ -490,159 +358,15 @@ public class AexopDcs {
     CSVManage.saveDescriptorMResult(frontInst, nameDirComplete);
   }
 
-  /**
-   * Executes the MD replace operation for each population in parallel.
-   *
-   * @param children4Population a map containing the population index and corresponding instances
-   * @throws AExOpDCSException if an error occurs during the replace operation
-   */
-  protected void executeMDReplace(Map<Integer, PopulationInstances> children4Population)
-      throws AExOpDCSException {
-    resourceMetrics.logMetrics("executeMDReplace(before)", getClass().getName());
-
-    for (Map.Entry<Integer, PopulationInstances> entry : children4Population.entrySet()) {
-      populations.get(entry.getKey()).makeReplace(entry.getValue());
+  protected void executeEvolutionSteps() throws AExOpDCSException {
+    resourceMetrics.logMetrics("executeEvolutionSteps(before)", getClass().getName());
+    long initOpe = System.currentTimeMillis();
+    for (DCSEvolutive dcsEvolutive : populations) {
+      dcsEvolutive.executeEvolutiveSteps(curIter);
     }
-    resourceMetrics.logMetrics("executeMDReplace(after)", getClass().getName());
-  }
-
-  protected Map<Integer, PopulationInstances> executeEvolutiveSteps() throws AExOpDCSException {
-    resourceMetrics.logMetrics("executeEvolutiveSteps(before)", getClass().getName());
-    int sumReal = 0;
-    Map<Integer, PopulationInstances> children4Population = null;
-    int sumExp =
-        conf.getDcsEvolutiveConfig().getSelConf().getCant() * conf.getAAttributeDCSList().size();
-    int numRep = 1;
-    while (sumReal < sumExp) {
-
-      // get size for population
-      long initTime = System.currentTimeMillis();
-      Map<Integer, Integer> size4Pop = getSize4Pop(children4Population);
-
-      LOGGER.info(
-          "Step 4.1: Compute population size take: {} ms in iteration {}",
-          System.currentTimeMillis() - initTime,
-          numRep);
-
-      // genetic operator for family
-      initTime = System.currentTimeMillis();
-
-      executeGeneticOperators(size4Pop);
-      LOGGER.info(
-          "Step 4.2: Genetic operators take {} ms in iteration {}",
-          System.currentTimeMillis() - initTime,
-          numRep);
-
-      // compute
-      initTime = System.currentTimeMillis();
-      Map<Integer, PopulationInstances> children4PopulationLocal =
-          getChildrenAndCompute(size4Pop.keySet());
-      LOGGER.info(
-          "Step 4.3: Compute new MD children take {} ms in iteration {}",
-          System.currentTimeMillis() - initTime,
-          numRep);
-
-      // filter
-      initTime = System.currentTimeMillis();
-      children4PopulationLocal = applyFilter2Children(children4PopulationLocal);
-      LOGGER.info(
-          "Step 4.4: Apply MD filter take {} ms in iteration {}",
-          System.currentTimeMillis() - initTime,
-          numRep);
-
-      // merge
-      initTime = System.currentTimeMillis();
-      if (children4Population == null)
-        children4Population = new LinkedHashMap<>(children4PopulationLocal);
-      else {
-        for (Map.Entry<Integer, PopulationInstances> entry : children4PopulationLocal.entrySet()) {
-          children4Population.put(
-              entry.getKey(),
-              PopulationInstances.merge(children4Population.get(entry.getKey()), entry.getValue()));
-        }
-      }
-      LOGGER.info(
-          "Step 4.5: merge new children take {} ms in iteration {}",
-          System.currentTimeMillis() - initTime,
-          numRep++);
-
-      sumReal =
-          children4Population.values().stream().mapToInt(PopulationInstances::numAttributes).sum();
-    }
-    resourceMetrics.logMetrics("executeEvolutiveSteps(after)", getClass().getName());
-    return children4Population;
-  }
-
-  private Map<Integer, Integer> getSize4Pop(Map<Integer, PopulationInstances> children4Population) {
-    Map<Integer, Integer> size4Pop = new LinkedHashMap<>();
-
-    int defaultCount = conf.getDcsEvolutiveConfig().getSelConf().getCant();
-
-    IntStream.range(0, populations.size())
-        .forEach(
-            idx -> {
-              int toGen = defaultCount;
-              if (children4Population != null && children4Population.get(idx) != null)
-                toGen -= children4Population.get(idx).numAttributes();
-              if (toGen > 0) size4Pop.put(idx, toGen);
-            });
-
-    return size4Pop;
-  }
-
-  protected void executeGeneticOperators(Map<Integer, Integer> size4Pop) throws AExOpDCSException {
-    for (Map.Entry<Integer, Integer> entry : size4Pop.entrySet()) {
-      populations.get(entry.getKey()).geneticsOperators(entry.getValue());
-    }
-  }
-
-  protected Map<Integer, PopulationInstances> getChildrenAndCompute(Set<Integer> idxPop)
-      throws AExOpDCSException {
-    Map<Integer, Set<String>> popHeads = new LinkedHashMap<>();
-    AtomicInteger pos = new AtomicInteger(0);
-    Set<String> allHeads =
-        idxPop.stream()
-            .map(idx -> populations.get(idx).getChildrenAsString())
-            .peek(heads -> popHeads.put(pos.getAndIncrement(), heads))
-            .flatMap(Set::stream)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    if (allHeads.isEmpty()) {
-      LOGGER.error("No molecular descriptors to compute");
-      return new LinkedHashMap<>();
-    }
-    PopulationInstances instances = computeDesc(allHeads);
-    return splitTotalPopulation(instances, popHeads);
-  }
-
-  /**
-   * Applies filters to children population instances asynchronously.
-   *
-   * @param children4Population a map containing population instances to be filtered
-   * @return a map with filtered population instances
-   * @throws AExOpDCSException if an error occurs during the filtering process
-   */
-  protected Map<Integer, PopulationInstances> applyFilter2Children(
-      Map<Integer, PopulationInstances> children4Population) throws AExOpDCSException {
-
-    if (Objects.isNull(children4Population)) {
-      LOGGER.error("No molecular descriptors to filter");
-      return new LinkedHashMap<>();
-    }
-
-    if (children4Population.isEmpty()) {
-      LOGGER.error("No molecular descriptors to filter");
-      return new LinkedHashMap<>();
-    }
-
-    Map<Integer, PopulationInstances> children4PopulationFiltered = new HashMap<>();
-
-    for (Map.Entry<Integer, PopulationInstances> entry : children4Population.entrySet()) {
-      PopulationInstances data = entry.getValue();
-      populations.get(entry.getKey()).applyFilter(data);
-      children4PopulationFiltered.put(entry.getKey(), data);
-    }
-    return children4PopulationFiltered;
+    LOGGER.info(
+        "Step 4: Genetic operators take {} milliseconds", System.currentTimeMillis() - initOpe);
+    resourceMetrics.logMetrics("executeEvolutionSteps(after)", getClass().getName());
   }
 
   private void updateExecStatus() throws AExOpDCSException {

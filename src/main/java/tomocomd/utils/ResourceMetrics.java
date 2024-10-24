@@ -5,27 +5,30 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadMXBean;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import tomocomd.exceptions.AExOpDCSException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ResourceMetrics {
 
   private static final String LOG_NAME = "logs/resource-metrics.log";
   private static final long MB = 1024 * 1024;
 
-  private static final Logger logger = Logger.getLogger(ResourceMetrics.class.getName());
+  private static final Logger logger = LogManager.getLogger(ResourceMetrics.class);
 
-  public ResourceMetrics() throws AExOpDCSException {
-    try {
-      FileHandler fileHandler = new FileHandler(LOG_NAME, true);
-      fileHandler.setFormatter(new OneLineFormatter());
-      logger.addHandler(fileHandler);
-    } catch (Exception e) {
-      throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(e);
-    }
+  public ResourceMetrics() {
+    //    // Remueve el console handler para evitar salida estándar
+    //    Logger rootLogger = Logger.getLogger("");
+    //    for (var handler : rootLogger.getHandlers()) {
+    //      if (handler instanceof ConsoleHandler) {
+    //        rootLogger.removeHandler(handler);
+    //      }
+    //    }
+    //
+    //    // Configurar el file handler
+    //    FileHandler fileHandler = new FileHandler("logs/resource-metrics.log", true);
+    //    fileHandler.setFormatter(new OneLineFormatter());
+    //    logger.addHandler(fileHandler);
+    //    logger.setLevel(Level.ALL); // Ajusta el nivel según sea necesario
   }
 
   // recover metrics
@@ -70,10 +73,10 @@ public class ResourceMetrics {
             activeThreadCount));
   }
 
-  private static class OneLineFormatter extends Formatter {
-    @Override
-    public String format(LogRecord logRecord) {
-      return logRecord.getMessage() + System.lineSeparator();
-    }
-  }
+  //  private static class OneLineFormatter extends Formatter {
+  //    @Override
+  //    public String format(LogRecord logRecord) {
+  //      return logRecord.getMessage() + System.lineSeparator();
+  //    }
+  //  }
 }
