@@ -15,6 +15,8 @@ import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.DCSEvolutiveConfig;
 import tomocomd.configuration.subsetsearch.operators.GASelectionType;
 import tomocomd.data.PopulationInstances;
+import tomocomd.descriptors.IPDComputer;
+import tomocomd.descriptors.PDComputerFactory;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.subsetsearch.evaluation.attributeevaluation.AAtributeEvaluation;
 import tomocomd.subsetsearch.evaluation.attributeevaluation.AttributeEvaluationFactory;
@@ -49,8 +51,10 @@ public final class DCSEvolutive {
   //  subsets
   @Getter private PopulationInstances bestSubset;
   private final List<String> generatedHeads;
+  private final String fastaFile;
 
-  public DCSEvolutive(DCSEvolutiveConfig gaAlgorithm4PobConf, AAttributeDCS amdHead) {
+  public DCSEvolutive(
+      DCSEvolutiveConfig gaAlgorithm4PobConf, AAttributeDCS amdHead, String fastaFile) {
 
     this.dcsEvolutiveConfig = gaAlgorithm4PobConf;
     this.amdHead = amdHead;
@@ -64,10 +68,106 @@ public final class DCSEvolutive {
     nameGeneratedFile =
         new File(
                 new File(FOLDER_NAME_MD),
-                String.format("%s_%d.txt", amdHead.getType(), System.currentTimeMillis()))
+                String.format("%s_%d.txt", amdHead.getName(), System.currentTimeMillis()))
             .getAbsolutePath();
     generatedHeads = new LinkedList<>();
+    this.fastaFile = fastaFile;
     LOGGER.info("DCS for {} objected created", amdHead.getType());
+  }
+
+  public void generatePopulation() {
+    long start = System.currentTimeMillis();
+    int numHeadGenerate = getNumDesc() - populationSize() + 1;
+    Set<String> heading =
+        generateHeadings(numHeadGenerate).stream()
+            .map(AHeadEntity::toString)
+            .collect(Collectors.toSet());
+    while (!heading.isEmpty()) {
+      mergeSubset(computeDesc(heading));
+      applyFilter();
+      numHeadGenerate = getNumDesc() - populationSize() + 1;
+      heading =
+          generateHeadings(numHeadGenerate).stream()
+              .map(AHeadEntity::toString)
+              .collect(Collectors.toSet());
+    }
+    LOGGER.info(
+        "Generated {} MD take: {} ms", amdHead.getName(), System.currentTimeMillis() - start);
+  }
+
+  /**
+   * Computes molecular descriptors for the given set of headings.
+   *
+   * @param allHeads the set of headings to compute descriptors for.
+   * @return the computed molecular descriptors.
+   * @throws AExOpDCSException if there's an issue computing descriptors.
+   */
+  private PopulationInstances computeDesc(Set<String> allHeads) throws AExOpDCSException {
+    IPDComputer molecularDescriptorCalculator = PDComputerFactory.getComputer(amdHead.getType());
+    long initTime = System.currentTimeMillis();
+    LOGGER.debug("Computing {} {} MD ", allHeads.size(), amdHead.getType());
+    PopulationInstances data = molecularDescriptorCalculator.compute(allHeads, fastaFile);
+    LOGGER.debug(
+        "Computed {} molecular descriptors take {} ms",
+        allHeads.size(),
+        System.currentTimeMillis() - initTime);
+    return data;
+  }
+
+  public void executeEvolutiveSteps(int curIter) {
+    long start = System.currentTimeMillis();
+    int generatedChildren = 0;
+    int totalChildren = dcsEvolutiveConfig.getSelConf().getCant();
+    int toGene;
+    PopulationInstances newChildren = null;
+    long initTime;
+    int numRep = 1;
+    while (generatedChildren < totalChildren) {
+      toGene = totalChildren - generatedChildren;
+      initTime = System.currentTimeMillis();
+      geneticsOperators(toGene);
+      LOGGER.info(
+          "Step 4.1: Genetic operators for {} family take {} ms in iteration {}.{}",
+          amdHead.getType(),
+          System.currentTimeMillis() - initTime,
+          curIter,
+          numRep);
+      initTime = System.currentTimeMillis();
+      if (children.isEmpty())
+        System.out.println("Error in genetic operators, no children generated");
+      PopulationInstances populationInstancesChildren = computeDesc(getChildrenAsString());
+      LOGGER.info(
+          "Step 4.2: Compute new MD children for {} family take {} ms in iteration {}.{}",
+          amdHead.getType(),
+          System.currentTimeMillis() - initTime,
+          curIter,
+          numRep);
+      initTime = System.currentTimeMillis();
+      applyFilter(populationInstancesChildren);
+      LOGGER.info(
+          "Step 4.3: Apply MD filter for {} family take {} ms in iteration {}.{}",
+          amdHead.getType(),
+          System.currentTimeMillis() - initTime,
+          curIter,
+          numRep);
+      newChildren = PopulationInstances.merge(newChildren, populationInstancesChildren);
+      generatedChildren = newChildren.numAttributes();
+    }
+    if (Objects.nonNull(newChildren)) {
+      initTime = System.currentTimeMillis();
+      makeReplace(newChildren);
+      LOGGER.info(
+          "Step 4.4: Apply replace operation for {} family take {} ms in iteration {}.{}",
+          amdHead.getType(),
+          System.currentTimeMillis() - initTime,
+          curIter,
+          numRep);
+      LOGGER.info(
+          "Generated {} new children for {} MD take: {} ms",
+          newChildren.numAttributes(),
+          amdHead.getName(),
+          System.currentTimeMillis() - start);
+    }
   }
 
   /**
@@ -112,8 +212,8 @@ public final class DCSEvolutive {
     Set<AHeadEntity> headings = new LinkedHashSet<>();
     AHeadEntity nSHead;
     for (int i = 0; i < cant; i++) {
-      nSHead = amdHead.randomHeading();
-      while (generatedHeads.contains(nSHead.toString())) nSHead = amdHead.randomHeading();
+      do nSHead = amdHead.randomHeading();
+      while (generatedHeads.contains(nSHead.toString()));
       generatedHeads.add(nSHead.toString());
       headings.add(nSHead);
     }
@@ -293,6 +393,8 @@ public final class DCSEvolutive {
     children =
         new LinkedHashSet<>(
             new LinkedList<>(children).subList(0, Math.min(nParents, children.size())));
+    if (children.isEmpty())
+      System.out.println("Error in mutation operators, no children generated");
 
     LOGGER.debug(
         "Completed mutation operation for {} family in {} ms ",
@@ -335,6 +437,8 @@ public final class DCSEvolutive {
         AGACrossoverOperation crossoverOperation =
             GACrossoverFactory.getCrossover(dcsEvolutiveConfig.getCrossConf());
         children.addAll(crossoverOperation.makeCrossover(headP1, headP2));
+        if (children.isEmpty())
+          System.out.println("Error in crossover operators, no children generated");
       } catch (Exception ex) {
         throw AExOpDCSException.ExceptionType.DCS_EVOLUTION_EXCEPTION.get(
             "Problems getting offspring list", ex);
@@ -367,7 +471,7 @@ public final class DCSEvolutive {
       head = getHead4Pos(p);
       d = getHammingThreshold(headP1, head);
       LOGGER.debug("parents {} and {} are close for {} family", headP1, head, amdHead.getType());
-    } while (Statistics.hammingDistance(headP1, head) < d || parents.contains(p));
+    } while (Statistics.hammingDistance(headP1, head) <= d || parents.contains(p));
     return p;
   }
 }

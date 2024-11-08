@@ -11,11 +11,10 @@ public class App {
 
     AexopConfig conf = new AexopConfig();
     ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(new File("project_seq.json"), conf);
 
-    String pathFasta = new File("data\\TR_starPep_AF_training.fasta").getAbsolutePath();
-    String output = new File("data\\salida\\aexop_dcs_output.csv").getAbsolutePath();
-    String target = new File("data\\TR_starPep_AF_training_class.csv").getAbsolutePath();
+    String pathFasta = new File("data\\TR_starPep_AP.fasta").getAbsolutePath();
+    String output = new File("data\\salida\\aexop_dcs_output_APP.csv").getAbsolutePath();
+    String target = new File("data\\TR_starPep_AP_class.csv").getAbsolutePath();
     AexopDcs algorithm = new AexopDcs(conf, output, pathFasta, target);
     algorithm.compute();
   }

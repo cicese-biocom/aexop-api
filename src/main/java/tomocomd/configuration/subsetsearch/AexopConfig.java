@@ -59,13 +59,13 @@ public class AexopConfig implements Serializable {
   }
 
   private void initAttributeDCSList() {
-    StartpepDCS startpepDCS = new StartpepDCS("No_Classical"); // not classical aggregators
-    aAttributeDCSList.add(startpepDCS);
 
-    for (String clas : List.of("AC", "GV", "TS", "ES", "MIC")) {
+    for (String clas : List.of("AC", "GV", "TS")) {
       StartpepDCS startpepDCSClass = new StartpepDCS(clas);
       startpepDCSClass.getClassicalAggParam().getParams().put(clas, true);
-      startpepDCSClass.getClassicalAggParam().getParams().put("", false);
+      startpepDCSClass.getClassicalAggParam().getParams().put("ES", true);
+      startpepDCSClass.getClassicalAggParam().getParams().put("MIC", true);
+      startpepDCSClass.getClassicalAggParam().getParams().put("", true);
       aAttributeDCSList.add(startpepDCSClass);
     }
   }

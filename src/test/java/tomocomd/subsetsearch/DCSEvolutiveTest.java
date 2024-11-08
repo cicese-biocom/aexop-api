@@ -24,7 +24,7 @@ class DCSEvolutiveTest {
     DCSEvolutiveConfig dcsEvolutiveConfig = new DCSEvolutiveConfig();
     dcsEvolutiveConfig.getSelConf().setCant(2);
     AAttributeDCS aMdDCS = new StartpepDCS();
-    dcsEvolutive = new DCSEvolutive(dcsEvolutiveConfig, aMdDCS);
+    dcsEvolutive = new DCSEvolutive(dcsEvolutiveConfig, aMdDCS, null);
   }
 
   @Test
