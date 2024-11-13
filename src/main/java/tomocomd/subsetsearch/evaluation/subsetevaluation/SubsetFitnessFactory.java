@@ -7,7 +7,6 @@ package tomocomd.subsetsearch.evaluation.subsetevaluation;
 
 import tomocomd.configuration.evaluation.subsetevaluation.subsetfitness.SubsetFitnessType;
 import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.CfsSubsetEval;
 
 /**
  * @author potter
@@ -20,7 +19,7 @@ public class SubsetFitnessFactory {
 
   public static ASEvaluation getSubsetEvaluator(SubsetFitnessType type) {
     if (type == SubsetFitnessType.CFS) {
-      return new CfsSubsetEval();
+      return new CfsSubsetEvalDiscretePrecision();
     }
     throw new IllegalStateException(String.format("Merit subset function %s not defined", type));
   }
