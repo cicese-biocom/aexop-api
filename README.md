@@ -4,8 +4,7 @@
 ![Badge en Desarollo](https://img.shields.io/badge/STATUS-IN%20PROGRESS-green)
 ![Java 11](https://img.shields.io/badge/Java-11-blue.svg)
 ![Maven](https://img.shields.io/badge/Maven-3.8.8-blue.svg)
-[![Maven Package](https://github.com/cicese-biocom/aexop-dcs-api/actions/workflows/maven-publish.yml/badge.svg?branch=main)](https://github.com/cicese-biocom/aexop-dcs-api/actions/workflows/maven-publish.yml)
-
+[![API-Build And Release](https://github.com/cicese-biocom/aexop-api/actions/workflows/maven_release.yml/badge.svg)](https://github.com/cicese-biocom/aexop-api/actions/workflows/maven_release.yml)
 ## Description
 
 A Java API to execute AExOp-DCS algorithm for macromolecules. AExOp-DCS is a new genetic algorithm-based strategy to
