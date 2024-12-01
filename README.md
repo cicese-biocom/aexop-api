@@ -1,4 +1,4 @@
-# aexop-dcs-seq-api
+# aexop-api
 
 
 ![Badge en Desarollo](https://img.shields.io/badge/STATUS-IN%20PROGRESS-green)

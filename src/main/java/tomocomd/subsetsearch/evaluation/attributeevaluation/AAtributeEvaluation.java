@@ -1,7 +1,7 @@
 package tomocomd.subsetsearch.evaluation.attributeevaluation;
 
 import lombok.Getter;
-import tomocomd.configuration.evaluation.mdevaluation.AttributeEvaluationType;
+import tomocomd.configuration.evaluation.attributeevaluation.AttributeEvaluationType;
 import tomocomd.data.PopulationInstances;
 import tomocomd.exceptions.AExOpDCSException;
 

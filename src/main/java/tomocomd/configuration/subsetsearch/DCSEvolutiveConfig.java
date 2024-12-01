@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import tomocomd.configuration.evaluation.mdevaluation.AttributeEvaluationConf;
+import tomocomd.configuration.evaluation.attributeevaluation.AttributeEvaluationConf;
 import tomocomd.configuration.filters.FilterConfig;
 import tomocomd.configuration.filters.FilterType;
 import tomocomd.configuration.subsetsearch.operators.GACrossoverConf;
@@ -64,7 +64,7 @@ public class DCSEvolutiveConfig implements Serializable {
         + getCrossConf()
         + ",\n\t\t\t\t Mutation="
         + getMutConf()
-        + ",\n\t\t\t\t Replace md="
+        + ",\n\t\t\t\t Replace="
         + getReplaceSubConf()
         + "\n\t}";
   }

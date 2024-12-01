@@ -32,7 +32,7 @@ public class MeanPlusSTDRankingEvaluateSubset implements IEvaluateSubset {
     // get md importance and sorted it
     double[] fitness = inst.getEva4Desc();
     List<Integer> pos = SortInstancesByAttribute.sortAndGetPos(fitness, true);
-    pos.remove(pos.indexOf(inst.classIndex()));
+    pos.remove((Integer) inst.classIndex());
     pos.add(0, inst.classIndex());
 
     // order att in data by pos
@@ -84,7 +84,7 @@ public class MeanPlusSTDRankingEvaluateSubset implements IEvaluateSubset {
       inst.deleteAttributesByPos(new LinkedHashSet<>(pos2Del), false);
     } catch (Exception e) {
       throw AExOpDCSException.ExceptionType.SUBSET_EVALUATE_EXCEPTION.get(
-          "Error deleting correlated md", e);
+          "Error deleting correlated objects", e);
     }
 
     double meanStd = 0;
@@ -111,7 +111,7 @@ public class MeanPlusSTDRankingEvaluateSubset implements IEvaluateSubset {
       inst.deleteAttributesByPos(pos2rem, false);
     } catch (Exception e) {
       throw AExOpDCSException.ExceptionType.SUBSET_EVALUATE_EXCEPTION.get(
-          "Error deleting extra md", e);
+          "Error deleting extra object", e);
     }
 
     try {

@@ -1,6 +1,6 @@
 package tomocomd.subsetsearch.evaluation.attributeevaluation;
 
-import tomocomd.configuration.evaluation.mdevaluation.AttributeEvaluationType;
+import tomocomd.configuration.evaluation.attributeevaluation.AttributeEvaluationType;
 import tomocomd.data.PopulationInstances;
 import tomocomd.exceptions.AExOpDCSException;
 import weka.classifiers.trees.RandomForest;

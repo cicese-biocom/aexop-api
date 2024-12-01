@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tomocomd.configuration.evaluation.mdevaluation;
+package tomocomd.configuration.evaluation.attributeevaluation;
 
 import java.io.Serializable;
 import java.util.Arrays;

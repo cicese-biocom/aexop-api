@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tomocomd.configuration.evaluation.mdevaluation;
+package tomocomd.configuration.evaluation.attributeevaluation;
 
 import lombok.Getter;
 
@@ -29,20 +29,4 @@ public enum AttributeEvaluationType {
     return this.getValue();
   }
 
-  public static AttributeEvaluationType getEnum(String value) {
-    switch (value) {
-      case "Shannon entropy":
-        return SE;
-      case "R2":
-        return R2;
-      case "ReliefF":
-        return RELIEFF;
-      case "Choquet integral":
-        return CHOQUET;
-      case "Impurity":
-        return IMPURITY;
-      default:
-        throw new IllegalArgumentException();
-    }
-  }
 }

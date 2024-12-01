@@ -1,4 +1,4 @@
-package tomocomd.configuration.evaluation.mdevaluation;
+package tomocomd.configuration.evaluation.attributeevaluation;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,7 +10,7 @@ import tomocomd.configuration.evaluation.fussylogic.FuzzyIntegralType;
 import tomocomd.configuration.evaluation.fussylogic.FuzzyMeasureType;
 
 @ExtendWith(MockitoExtension.class)
-class MDNameEvaluationConfTest {
+class AttributeEvaluationConfTest {
 
   AttributeEvaluationConf attributeEvaluationConf;
 

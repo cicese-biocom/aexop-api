@@ -7,6 +7,7 @@ package tomocomd.subsetsearch.evolutive.crossover;
 
 import java.util.*;
 import tomocomd.configuration.dcs.AHeadEntity;
+import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.operators.GACrossoverConf;
 import tomocomd.exceptions.AExOpDCSException;
 
@@ -15,8 +16,8 @@ import tomocomd.exceptions.AExOpDCSException;
  */
 public class UniformCrossover extends AGACrossoverOperation {
 
-  public UniformCrossover(GACrossoverConf conf) {
-    super(conf);
+  public UniformCrossover(GACrossoverConf conf, HeadFactory headFactory) {
+    super(conf, headFactory);
   }
 
   @Override

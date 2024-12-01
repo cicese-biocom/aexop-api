@@ -6,7 +6,7 @@
 package tomocomd.subsetsearch.replace.replacesubpopulation;
 
 import java.util.List;
-import tomocomd.configuration.dcs.PDType;
+import tomocomd.configuration.dcs.AttributeType;
 import tomocomd.data.PopulationInstances;
 import tomocomd.exceptions.AExOpDCSException;
 
@@ -15,7 +15,7 @@ import tomocomd.exceptions.AExOpDCSException;
  */
 public interface IMDGAReplace {
   PopulationInstances makeReplace(
-      PDType type,
+      AttributeType type,
       PopulationInstances m,
       List<Integer> parents,
       PopulationInstances childrenInstances)

@@ -5,6 +5,7 @@
  */
 package tomocomd.subsetsearch.evolutive.crossover;
 
+import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.operators.GACrossoverConf;
 import tomocomd.configuration.subsetsearch.operators.GACrossoverType;
 
@@ -15,9 +16,9 @@ public class GACrossoverFactory {
 
   private GACrossoverFactory() {}
 
-  public static AGACrossoverOperation getCrossover(GACrossoverConf conf) {
-    if (conf.getType() == GACrossoverType.UNIFORM) return new UniformCrossover(conf);
-    else if (conf.getType() == GACrossoverType.HUX) return new HuxCrossover(conf);
+  public static AGACrossoverOperation getCrossover(GACrossoverConf conf, HeadFactory headFactory) {
+    if (conf.getType() == GACrossoverType.UNIFORM) return new UniformCrossover(conf, headFactory);
+    else if (conf.getType() == GACrossoverType.HUX) return new HuxCrossover(conf, headFactory);
     throw new IllegalArgumentException("Crossover type not supported: " + conf.getType());
   }
 }

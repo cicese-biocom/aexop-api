@@ -5,19 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import tomocomd.configuration.dcs.AAttributeDCS;
-import tomocomd.configuration.dcs.startpep.StartpepDCS;
 import tomocomd.configuration.evaluation.subsetevaluation.SubsetEvaluationConfig;
 import tomocomd.configuration.subsetsearch.operators.GAResetConf;
 
 @Data
-@Builder
 @AllArgsConstructor
-public class AexopConfig implements Serializable {
+public abstract class AexopConfig implements Serializable {
   private DCSEvolutiveConfig dcsEvolutiveConfig;
-  private List<AAttributeDCS> aAttributeDCSList;
+  protected List<AAttributeDCS> aAttributeDCSList;
   protected GAResetConf gaResetConf;
   private SubsetEvaluationConfig subsetEva;
   private Integer numIter;
@@ -58,15 +55,5 @@ public class AexopConfig implements Serializable {
         + "\n\t]\n}";
   }
 
-  private void initAttributeDCSList() {
-
-    for (String clas : List.of("AC", "GV", "TS")) {
-      StartpepDCS startpepDCSClass = new StartpepDCS(clas);
-      startpepDCSClass.getClassicalAggParam().getParams().put(clas, true);
-      startpepDCSClass.getClassicalAggParam().getParams().put("ES", true);
-      startpepDCSClass.getClassicalAggParam().getParams().put("MIC", true);
-      startpepDCSClass.getClassicalAggParam().getParams().put("", true);
-      aAttributeDCSList.add(startpepDCSClass);
-    }
-  }
+  protected abstract void initAttributeDCSList();
 }

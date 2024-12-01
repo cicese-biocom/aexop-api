@@ -12,8 +12,8 @@ import tomocomd.exceptions.AExOpDCSException;
 
 public class UniformMutation extends AGAMutation {
 
-  public UniformMutation(GAMutationConf conf) {
-    super(conf);
+  public UniformMutation(GAMutationConf conf, DCSFactory dcsFactory) {
+    super(conf, dcsFactory);
   }
 
   @Override
@@ -21,7 +21,7 @@ public class UniformMutation extends AGAMutation {
     Random r = new Random(System.currentTimeMillis());
     Map<String, String> mapHead = head.parseHead2Map();
 
-    AAttributeDCS dcs = DCSFactory.getDcs(head.getType());
+    AAttributeDCS dcs = dcsFactory.getDcs(head.getType());
 
     int cantParam = mapHead.size();
     List<String> params = new LinkedList<>(mapHead.keySet());

@@ -23,12 +23,14 @@ public abstract class AGACrossoverOperation {
 
   protected final double prob;
   private final GACrossoverType type;
+  private final HeadFactory headFactory;
 
   static final Logger LOGGER = LogManager.getLogger(AGACrossoverOperation.class);
 
-  protected AGACrossoverOperation(GACrossoverConf conf) {
+  protected AGACrossoverOperation(GACrossoverConf conf, HeadFactory headFactory) {
     type = conf.getType();
     prob = conf.getProb();
+    this.headFactory = headFactory;
   }
 
   public abstract List<AHeadEntity> crossover(AHeadEntity a1, AHeadEntity a2)
@@ -55,9 +57,9 @@ public abstract class AGACrossoverOperation {
   protected List<AHeadEntity> getaHeadEntities(
       AHeadEntity a1, AHeadEntity a2, Map<String, String> hA1, Map<String, String> hA2) {
     try {
-      AHeadEntity h1 = HeadFactory.getHead(a1.getType());
+      AHeadEntity h1 = headFactory.getHead(a1.getType());
       h1.parseMap2Head(hA1);
-      AHeadEntity h2 = HeadFactory.getHead(a2.getType());
+      AHeadEntity h2 = headFactory.getHead(a2.getType());
       h2.parseMap2Head(hA2);
       List<AHeadEntity> heads = new LinkedList<>();
       heads.add(h1);

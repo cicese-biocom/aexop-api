@@ -26,7 +26,7 @@ class DCSEvolutiveConfigTest {
         + "\t\t\t\t Selection={cant=20, type=Tournament, options=[-s, 5]},\n"
         + "\t\t\t\t Crossover={type=HUX, prob=1.0},\n"
         + "\t\t\t\t Mutation={gaMutationType=UNIFORM, prob=0.1},\n"
-        + "\t\t\t\t Replace md={type=PARENT}\n"
+        + "\t\t\t\t Replace={type=PARENT}\n"
         + "\t}";
   }
 }
