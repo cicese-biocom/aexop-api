@@ -10,8 +10,11 @@ import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tomocomd.configuration.dcs.AAttributeDCS;
+import tomocomd.configuration.dcs.DCSFactory;
+import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.AexopConfig;
 import tomocomd.data.PopulationInstances;
+import tomocomd.descriptors.AttributeComputerFactory;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.io.CSVManage;
 import tomocomd.subsetsearch.evaluation.subsetevaluation.EvaluateSubsetFactory;
@@ -47,7 +50,14 @@ public class AexopDcs {
   private final PopulationInstances targetInstances;
   private final ResourceMetrics resourceMetrics;
 
-  public AexopDcs(AexopConfig conf, String outFile, String fastaFile, String pathCsvTarget)
+  public AexopDcs(
+      AexopConfig conf,
+      String outFile,
+      String inputFile,
+      String pathCsvTarget,
+      AttributeComputerFactory attributeComputerFactory,
+      HeadFactory headFactory,
+      DCSFactory dcsFactory)
       throws AExOpDCSException {
 
     pathOut = outFile;
@@ -62,7 +72,14 @@ public class AexopDcs {
     populations = new LinkedList<>();
 
     for (AAttributeDCS head : conf.getAAttributeDCSList()) {
-      populations.add(new DCSEvolutive(conf.getDcsEvolutiveConfig(), head, fastaFile));
+      populations.add(
+          new DCSEvolutive(
+              conf.getDcsEvolutiveConfig(),
+              head,
+              inputFile,
+              attributeComputerFactory,
+              headFactory,
+              dcsFactory));
       populations.get(populations.size() - 1).resetBestSubset(getTargetInstances());
     }
     if (Boolean.TRUE.equals(conf.getCoop())) coopsPob = new PopulationInstances[populations.size()];

@@ -82,7 +82,7 @@ public class CorrelationFilter extends AbstractFilterDecorator {
                 i--;
               } else {
                 pos.add(x);
-                posJ.remove(posJ.indexOf(x));
+                posJ.remove((Integer) x);
                 j = 0;
               }
             }
@@ -90,7 +90,8 @@ public class CorrelationFilter extends AbstractFilterDecorator {
             throw AExOpDCSException.ExceptionType.FILTER_EXCEPTION.get(
                 "Problems computing SE value for md", ex);
           } catch (Exception ex) {
-            throw AExOpDCSException.ExceptionType.FILTER_EXCEPTION.get("Problems filter md", ex);
+            throw AExOpDCSException.ExceptionType.FILTER_EXCEPTION.get(
+                "Problems filter objects", ex);
           }
         }
       }

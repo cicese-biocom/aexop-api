@@ -13,5 +13,5 @@ public interface AHeadEntity {
 
   boolean setParamValue(String paramName, String value) throws AExOpDCSException;
 
-  PDType getType();
+  AttributeType getType();
 }

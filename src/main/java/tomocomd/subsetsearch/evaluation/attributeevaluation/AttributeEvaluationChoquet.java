@@ -2,11 +2,11 @@ package tomocomd.subsetsearch.evaluation.attributeevaluation;
 
 import java.util.Arrays;
 import java.util.Map;
+import tomocomd.configuration.evaluation.attributeevaluation.AttributeEvaluationType;
 import tomocomd.configuration.evaluation.fussylogic.FuzzyIntegralConf;
 import tomocomd.configuration.evaluation.fussylogic.FuzzyIntegralType;
 import tomocomd.configuration.evaluation.fussylogic.FuzzyMeasureConf;
 import tomocomd.configuration.evaluation.fussylogic.FuzzyMeasureType;
-import tomocomd.configuration.evaluation.mdevaluation.AttributeEvaluationType;
 import tomocomd.data.PopulationInstances;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.subsetsearch.evaluation.attributeevaluation.fuzzylogic.fuzzyintegrals.AFuzzyIntegral;

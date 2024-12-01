@@ -3,18 +3,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>tomocomd</groupId>
-    <artifactId>aexop-dcs-seq-api</artifactId>
+    <artifactId>aexop-api</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>aexop-dcs-seq</name>
+    <name>aexop-api</name>
     <url>https://maven.apache.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <weka.version>3.9.6</weka.version>
         <!-- JaCoCo Properties -->
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
@@ -101,11 +101,10 @@
         </dependency>
 
         <dependency>
-            <groupId>tomocomd</groupId>
-            <artifactId>startpep-md</artifactId>
-            <version>0.1</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>

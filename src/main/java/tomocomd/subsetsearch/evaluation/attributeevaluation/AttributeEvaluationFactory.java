@@ -5,7 +5,7 @@
  */
 package tomocomd.subsetsearch.evaluation.attributeevaluation;
 
-import tomocomd.configuration.evaluation.mdevaluation.AttributeEvaluationConf;
+import tomocomd.configuration.evaluation.attributeevaluation.AttributeEvaluationConf;
 import tomocomd.exceptions.AExOpDCSException;
 
 /**

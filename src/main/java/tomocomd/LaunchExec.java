@@ -5,7 +5,10 @@
  */
 package tomocomd;
 
+import tomocomd.configuration.dcs.DCSFactory;
+import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.AexopConfig;
+import tomocomd.descriptors.AttributeComputerFactory;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.subsetsearch.AexopDcs;
 
@@ -19,10 +22,24 @@ public class LaunchExec {
   }
 
   public static void launchExec(
-      AexopConfig conf, String outFile, String fastaFile, String pathCsvTarget)
+      AexopConfig conf,
+      String outFile,
+      String inputObjectFile,
+      String pathCsvTarget,
+      AttributeComputerFactory attributeComputerFactory,
+      HeadFactory headFactory,
+      DCSFactory dcsFactory)
       throws AExOpDCSException {
 
-    AexopDcs algorithm = new AexopDcs(conf, outFile, fastaFile, pathCsvTarget);
+    AexopDcs algorithm =
+        new AexopDcs(
+            conf,
+            outFile,
+            inputObjectFile,
+            pathCsvTarget,
+            attributeComputerFactory,
+            headFactory,
+            dcsFactory);
     algorithm.compute();
   }
 }
