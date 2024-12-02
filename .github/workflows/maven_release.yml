@@ -100,3 +100,9 @@ jobs:
           tag_name: "v${{ env.new_version }}"
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn deploy -e -X -s $HOME/.m2/settings.xml
+        env:
+          GITHUB_ACTOR: ${{ secrets.USER_NAME }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
