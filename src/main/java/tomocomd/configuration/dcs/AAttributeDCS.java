@@ -13,10 +13,17 @@ public abstract class AAttributeDCS implements Serializable {
 
   protected final String name;
 
+  protected AAttributeDCS() {
+    this.name = "AttributeDCS";
+  }
+
   @JsonIgnore
   public abstract AttributeType getType();
 
   public abstract AHeadEntity randomHeading();
+
+  @JsonIgnore
+  public abstract long getSetDim();
 
   @JsonIgnore
   public abstract String getDesc();

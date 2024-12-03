@@ -28,5 +28,4 @@ public enum AttributeEvaluationType {
   public String toString() {
     return this.getValue();
   }
-
 }
