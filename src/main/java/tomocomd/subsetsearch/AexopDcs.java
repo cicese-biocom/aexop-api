@@ -54,7 +54,7 @@ public class AexopDcs {
       AexopConfig conf,
       String outFile,
       String inputFile,
-      String pathCsvTarget,
+      PopulationInstances target,
       AttributeComputerFactory attributeComputerFactory,
       HeadFactory headFactory,
       DCSFactory dcsFactory)
@@ -62,7 +62,7 @@ public class AexopDcs {
 
     pathOut = outFile;
 
-    targetInstances = new PopulationInstances(CSVManage.loadCSV(pathCsvTarget));
+    targetInstances = new PopulationInstances(target);
     targetInstances.setClassIndex(0);
 
     curIter = 0;
@@ -162,7 +162,7 @@ public class AexopDcs {
   public void generatePopulation() throws AExOpDCSException {
     resourceMetrics.logMetrics("generatePopulation(before)", getClass().getName());
     try {
-      populations.forEach(DCSEvolutive::generatePopulation);
+      populations.parallelStream().forEach(DCSEvolutive::generatePopulation);
     } catch (Exception e) {
       throw AExOpDCSException.ExceptionType.AEXOPDCS_EXCEPTION.get(
           "Error generating new population", e);

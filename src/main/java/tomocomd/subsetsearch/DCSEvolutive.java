@@ -120,7 +120,7 @@ public final class DCSEvolutive {
    */
   private PopulationInstances computeDesc(Set<String> allHeads) throws AExOpDCSException {
     IAttributeComputer molecularDescriptorCalculator =
-        attributeComputerFactory.getComputer(attributeDCS.getType());
+        attributeComputerFactory.getComputer(attributeDCS.getType().getComputerType());
     long initTime = System.currentTimeMillis();
     LOGGER.debug(
         "Computing {} {} MD of name {}",
