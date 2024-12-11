@@ -1,8 +1,8 @@
 package tomocomd.descriptors;
 
-import tomocomd.configuration.dcs.AttributeType;
+import tomocomd.configuration.dcs.ComputerType;
 
 public interface AttributeComputerFactory {
 
-  IAttributeComputer getComputer(AttributeType type);
+  IAttributeComputer getComputer(ComputerType type);
 }

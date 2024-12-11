@@ -1,7 +1,8 @@
 package tomocomd.configuration.dcs;
 
+// Define una interfaz para los atributos
 public interface AttributeType {
-  String getName();
+  ComputerType getComputerType();
 
   String getCode();
 }

@@ -8,6 +8,7 @@ package tomocomd;
 import tomocomd.configuration.dcs.DCSFactory;
 import tomocomd.configuration.dcs.HeadFactory;
 import tomocomd.configuration.subsetsearch.AexopConfig;
+import tomocomd.data.PopulationInstances;
 import tomocomd.descriptors.AttributeComputerFactory;
 import tomocomd.exceptions.AExOpDCSException;
 import tomocomd.subsetsearch.AexopDcs;
@@ -25,7 +26,7 @@ public class LaunchExec {
       AexopConfig conf,
       String outFile,
       String inputObjectFile,
-      String pathCsvTarget,
+      PopulationInstances target,
       AttributeComputerFactory attributeComputerFactory,
       HeadFactory headFactory,
       DCSFactory dcsFactory)
@@ -36,7 +37,7 @@ public class LaunchExec {
             conf,
             outFile,
             inputObjectFile,
-            pathCsvTarget,
+            target,
             attributeComputerFactory,
             headFactory,
             dcsFactory);
