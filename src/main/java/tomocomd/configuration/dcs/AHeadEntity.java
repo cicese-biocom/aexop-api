@@ -1,9 +1,10 @@
 package tomocomd.configuration.dcs;
 
+import java.io.Serializable;
 import java.util.Map;
 import tomocomd.exceptions.AExOpDCSException;
 
-public interface AHeadEntity {
+public interface AHeadEntity extends Serializable {
 
   Map<String, String> parseHead2Map();
 

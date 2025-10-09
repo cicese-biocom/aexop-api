@@ -1,9 +1,6 @@
 package tomocomd.subsetsearch;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -36,7 +33,7 @@ import tomocomd.utils.Statistics;
 /**
  * @author Potter
  */
-public final class DCSEvolutive {
+public final class DCSEvolutive implements Serializable {
   static final Logger LOGGER = LogManager.getLogger(DCSEvolutive.class);
 
   private static final String FOLDER_NAME_MD = "generated_descriptors";
@@ -154,8 +151,7 @@ public final class DCSEvolutive {
           curIter,
           numRep);
       initTime = System.currentTimeMillis();
-      if (children.isEmpty())
-        System.out.println("Error in genetic operators, no children generated");
+      if (children.isEmpty()) LOGGER.info("Error in genetic operators, no children generated");
       PopulationInstances populationInstancesChildren = computeDesc(getChildrenAsString());
       LOGGER.info(
           "Step 4.2: Compute new MD children for {} family take {} ms in iteration {}.{}",
@@ -416,8 +412,7 @@ public final class DCSEvolutive {
     children =
         new LinkedHashSet<>(
             new LinkedList<>(children).subList(0, Math.min(nParents, children.size())));
-    if (children.isEmpty())
-      System.out.println("Error in mutation operators, no children generated");
+    if (children.isEmpty()) LOGGER.info("Error in mutation operators, no children generated");
 
     LOGGER.debug(
         "Completed mutation operation for {} family in {} ms ",
@@ -462,7 +457,7 @@ public final class DCSEvolutive {
             GACrossoverFactory.getCrossover(dcsEvolutiveConfig.getCrossConf(), headFactory);
         children.addAll(crossoverOperation.makeCrossover(headP1, headP2));
         if (children.isEmpty())
-          System.out.println("Error in crossover operators, no children generated");
+          LOGGER.error("Error in crossover operators, no children generated");
       } catch (Exception ex) {
         throw AExOpDCSException.ExceptionType.DCS_EVOLUTION_EXCEPTION.get(
             "Problems getting offspring list", ex);

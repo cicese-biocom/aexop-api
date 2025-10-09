@@ -1,6 +1,8 @@
 package tomocomd.configuration.dcs;
 
-public interface DCSFactory {
+import java.io.Serializable;
+
+public interface DCSFactory extends Serializable {
 
   AAttributeDCS getDcs(AttributeType type);
 }
