@@ -18,3 +18,37 @@ under study. In other words, AExOp-DCS is a dataset- and endpoint-guided algorit
 
 ## Graphical abstract
 ![src/main/resources/img.png](https://github.com/cicese-biocom/aexop-dcs/raw/main/src/main/resources/img.png)
+
+
+```mermaid
+graph TD;
+    A[Inicio] --> B[Inicialización de Variables];
+    B --> C[Inicialización de Múltiples Poblaciones];
+    C -->|Cada población i| C1[Inicializar Población i];
+    C1 --> D{¿t < T?};
+
+    D -- Sí --> E[Evaluación de Cada Población];
+    E -->|Cada población i| E1[Calcular descriptores de Población i];
+    E1 --> G1[Evaluar fitness de Población i];
+    G1 --> H1[Selección de Padres en Población i];
+    H1 --> I1[Crossover HUX en Población i];
+    I1 --> J1[Mutación en Población i];
+    J1 --> K1[Reemplazo de Población i];
+
+    K1 --> L[Unión y Ordenación de Soluciones];
+    L --> M[Calcular la Mejor Solución];
+    M --> N{¿Mejor Fitness Encontrado?};
+    
+    N -- Sí --> O[Actualizar Mejor Solución];
+    N -- No --> P{¿Reiniciar Poblaciones?};
+    
+    P -- Sí --> Q[Reinicialización de Poblaciones];
+    Q -->|Cada población i| Q1[Reinicializar Población i];
+    Q1 --> R[Incrementar t];
+    P -- No --> R;
+    
+    R --> D;
+    D -- No --> S[Retornar Mejor Subset];
+
+
+

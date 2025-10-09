@@ -1,82 +1,104 @@
 package tomocomd.utils;
 
 import com.sun.management.OperatingSystemMXBean;
+import java.io.IOException;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadMXBean;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
-public class ResourceMetrics {
+/**
+ * Clase para registrar métricas de uso de recursos (memoria, CPU, hilos, etc.) en un archivo
+ * separado (logs/resource-metrics.log).
+ */
+public class ResourceMetrics implements Serializable {
 
-  private static final String LOG_NAME = "logs/resource-metrics.log";
-  private static final long MB = 1024 * 1024;
+  private static final long MB = 1048576;
+  private static final String LOG_FILE = "logs/resource-metrics.log";
 
-  private static final Logger logger = LogManager.getLogger(ResourceMetrics.class);
+  // Logger propio, separado del logger principal de la aplicación
+  private static final Logger metricsLogger = Logger.getLogger("ResourceMetricsLogger");
 
-  public ResourceMetrics() {
-    //    // Remueve el console handler para evitar salida estándar
-    //    Logger rootLogger = Logger.getLogger("");
-    //    for (var handler : rootLogger.getHandlers()) {
-    //      if (handler instanceof ConsoleHandler) {
-    //        rootLogger.removeHandler(handler);
-    //      }
-    //    }
-    //
-    //    // Configurar el file handler
-    //    FileHandler fileHandler = new FileHandler("logs/resource-metrics.log", true);
-    //    fileHandler.setFormatter(new OneLineFormatter());
-    //    logger.addHandler(fileHandler);
-    //    logger.setLevel(Level.ALL); // Ajusta el nivel según sea necesario
+  static {
+    try {
+      // Evita que duplique salida en consola
+      metricsLogger.setUseParentHandlers(false);
+
+      // Crea el directorio de logs si no existe
+      java.nio.file.Files.createDirectories(java.nio.file.Paths.get("logs"));
+
+      // Configura el FileHandler (modo append = true)
+      FileHandler fileHandler = new FileHandler(LOG_FILE, true);
+      fileHandler.setFormatter(new OneLineFormatter());
+      fileHandler.setLevel(Level.INFO);
+
+      // Asocia el FileHandler solo a este logger
+      metricsLogger.addHandler(fileHandler);
+      metricsLogger.setLevel(Level.INFO);
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
-  // recover metrics
   public void logMetrics(String functionName, String className) {
-
     MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
     OperatingSystemMXBean osBean =
         (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
     ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
-    // heap (JVM)
+    // Heap de la JVM
     MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
     long usedHeapMemory = heapMemoryUsage.getUsed() / MB;
     long maxHeapMemory = heapMemoryUsage.getMax() / MB;
     long freeHeapMemory = maxHeapMemory - usedHeapMemory;
 
-    // CPU (%)
+    // CPU
     double cpuLoad = osBean.getSystemCpuLoad() * 100;
+    String formattedCpuLoad = String.format("%.2f", cpuLoad);
 
-    // RAM
+    // RAM física
     long freeRAM = osBean.getFreePhysicalMemorySize() / MB;
     long totalRAM = osBean.getTotalPhysicalMemorySize() / MB;
 
-    // threads
+    // Hilos
     int activeThreadCount = threadMXBean.getThreadCount();
 
-    logger.info(
+    // Fecha
+    String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    // Línea formateada
+    String message =
         String.format(
-            "[%s] | %s.%s | "
-                + "Heap Memory: %d MB / %d MB | Free Heap: %d MB | "
-                + "CPU Load: %.2f%% | Free RAM: %d MB / %d MB | Active Threads: %d",
-            java.time.LocalDateTime.now()
-                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-            functionName,
+            "[%s] | %s.%s | Heap: %d/%d MB (Free: %d MB) | CPU: %s%% | RAM: %d/%d MB | Threads: %d",
+            date,
             className,
+            functionName,
             usedHeapMemory,
             maxHeapMemory,
             freeHeapMemory,
-            cpuLoad,
+            formattedCpuLoad,
             freeRAM,
             totalRAM,
-            activeThreadCount));
+            activeThreadCount);
+
+    // Registro en archivo separado
+    metricsLogger.info(message);
   }
 
-  //  private static class OneLineFormatter extends Formatter {
-  //    @Override
-  //    public String format(LogRecord logRecord) {
-  //      return logRecord.getMessage() + System.lineSeparator();
-  //    }
-  //  }
+  // Formateador simple (una línea por log)
+  private static class OneLineFormatter extends Formatter {
+    @Override
+    public String format(LogRecord logRecord) {
+      return logRecord.getMessage() + System.lineSeparator();
+    }
+  }
 }

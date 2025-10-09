@@ -1,5 +1,7 @@
 package tomocomd.configuration.dcs;
 
-public interface ComputerType {
+import java.io.Serializable;
+
+public interface ComputerType extends Serializable {
   String getName();
 }

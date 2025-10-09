@@ -2,6 +2,7 @@ package tomocomd.subsetsearch;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ import tomocomd.subsetsearch.replace.resetpoblation.ResetPopulation;
 import tomocomd.utils.ResourceMetrics;
 
 @Getter
-public class AexopDcs {
+public class AexopDcs implements Serializable {
 
   private static final Logger LOGGER = LogManager.getLogger(AexopDcs.class);
 
@@ -33,8 +34,8 @@ public class AexopDcs {
 
   private static final String NAME_STATUS = "iterations";
   private static final String STARTING = "Starting iteration: {}";
-  private static final String MSS_ERROR_COMPUTED_SPLIT_DESC =
-      "Error splitting computed molecular descriptors set";
+  private static final String BEST_SUBSET_MSG =
+      "Best subset found with {} molecular descriptors and fitness={}";
 
   private int curIter;
   private int iterationsWithoutChanges;
@@ -90,7 +91,21 @@ public class AexopDcs {
   public void compute() throws AExOpDCSException {
     LOGGER.info("Starting subset search with configuration {}", conf);
     long startTime = System.currentTimeMillis();
-    for (curIter = 0; curIter < conf.getNumIter(); curIter++) {
+    runProcess();
+    LOGGER.info(BEST_SUBSET_MSG, bestSubset.numAttributes(), bestSubset.getEvaSub());
+    LOGGER.info("Subset search completed in {} ms", System.currentTimeMillis() - startTime);
+  }
+
+  public void restart() throws AExOpDCSException {
+    LOGGER.info("ReStarting subset search with configuration {}", conf);
+    long startTime = System.currentTimeMillis();
+    runProcess();
+    LOGGER.info(BEST_SUBSET_MSG, bestSubset.numAttributes(), bestSubset.getEvaSub());
+    LOGGER.info("Restart subset search completed in {} ms", System.currentTimeMillis() - startTime);
+  }
+
+  private void runProcess() {
+    for (; curIter < conf.getNumIter(); curIter++) {
       LOGGER.info(STARTING, curIter + 1);
       LOGGER.debug(STARTING, curIter + 1);
       long startTimeIter = System.currentTimeMillis();
@@ -101,11 +116,6 @@ public class AexopDcs {
           System.currentTimeMillis() - startTimeIter);
       LOGGER.debug("Completed iteration: {}", curIter + 1);
     }
-    LOGGER.info(
-        "Best subset found with {} molecular descriptors and fitness={}",
-        bestSubset.numAttributes(),
-        bestSubset.getEvaSub());
-    LOGGER.info("Subset search completed in {} ms", System.currentTimeMillis() - startTime);
   }
 
   /**

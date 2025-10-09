@@ -5,6 +5,7 @@
  */
 package tomocomd.subsetsearch.evolutive.selection;
 
+import java.io.Serializable;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,7 @@ import tomocomd.exceptions.AExOpDCSException;
  */
 @Setter
 @Getter
-public abstract class AbstractGASelectionOperator {
+public abstract class AbstractGASelectionOperator implements Serializable {
 
   protected int cant;
   protected int pro;
